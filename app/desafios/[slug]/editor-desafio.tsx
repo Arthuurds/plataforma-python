@@ -1,8 +1,11 @@
 'use client';
 
-import { useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import type { Desafio } from '@/lib/catalog';
 import type { MensagemDoWorker, MensagemParaWorker, ResultadoAvaliacao } from '@/lib/python/avaliacao';
+import { PROGRESSO_INICIAL, type Progresso } from '@/lib/progresso/progress-repository';
+import { criarProgressServiceDoNavegador } from '@/lib/progresso/navegador';
+import type { ProgressService } from '@/lib/progresso/progress-service';
 
 const TEMPO_LIMITE_MS = 10000;
 
@@ -12,10 +15,28 @@ export function EditorDesafio({ desafio }: { desafio: Desafio }) {
   const [executando, setExecutando] = useState(false);
   const [resultado, setResultado] = useState<ResultadoAvaliacao | null>(null);
   const [erro, setErro] = useState<string | null>(null);
+  const [progresso, setProgresso] = useState<Progresso>(PROGRESSO_INICIAL);
+  const [xpGanho, setXpGanho] = useState(0);
   const workerRef = useRef<Worker | null>(null);
   const tempoRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const progressRef = useRef<ProgressService | null>(null);
 
-  function iniciarWorker() {
+  const registrarSeAcertou = useCallback(
+    (resultadoAvaliacao: ResultadoAvaliacao) => {
+      if (resultadoAvaliacao.tipo !== 'avaliado' || !resultadoAvaliacao.testes.every((teste) => teste.passou)) {
+        return;
+      }
+
+      const registro = progressRef.current?.registrarResolucao(desafio.slug);
+      if (registro) {
+        setXpGanho(registro.xpGanho);
+        setProgresso(registro.progresso);
+      }
+    },
+    [desafio.slug],
+  );
+
+  const iniciarWorker = useCallback(() => {
     const worker = new Worker('/pyodide-worker.js', { type: 'module' });
 
     worker.onmessage = (evento: MessageEvent<MensagemDoWorker>) => {
@@ -35,6 +56,7 @@ export function EditorDesafio({ desafio }: { desafio: Desafio }) {
       if (mensagem.tipo === 'resultado') {
         setResultado(mensagem.resultado);
         setErro(null);
+        registrarSeAcertou(mensagem.resultado);
       } else {
         setResultado(null);
         setErro(mensagem.mensagem);
@@ -42,15 +64,21 @@ export function EditorDesafio({ desafio }: { desafio: Desafio }) {
     };
 
     workerRef.current = worker;
-  }
+  }, [registrarSeAcertou]);
 
-  function reiniciarWorker() {
+  const reiniciarWorker = useCallback(() => {
     workerRef.current?.terminate();
     setPronto(false);
     iniciarWorker();
-  }
+  }, [iniciarWorker]);
 
   useEffect(() => {
+    const progress = criarProgressServiceDoNavegador();
+    progressRef.current = progress;
+    // O localStorage só existe no navegador, então o progresso é lido depois da montagem.
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    setProgresso(progress.obterProgresso());
+
     iniciarWorker();
 
     return () => {
@@ -59,7 +87,7 @@ export function EditorDesafio({ desafio }: { desafio: Desafio }) {
         clearTimeout(tempoRef.current);
       }
     };
-  }, []);
+  }, [iniciarWorker]);
 
   function executar() {
     if (!workerRef.current || !pronto || executando) {
@@ -69,6 +97,7 @@ export function EditorDesafio({ desafio }: { desafio: Desafio }) {
     setExecutando(true);
     setResultado(null);
     setErro(null);
+    setXpGanho(0);
 
     const mensagem: MensagemParaWorker = { codigo, testes: desafio.testes };
     workerRef.current.postMessage(mensagem);
@@ -82,9 +111,15 @@ export function EditorDesafio({ desafio }: { desafio: Desafio }) {
   }
 
   const textoBotao = !pronto ? 'Carregando Python…' : executando ? 'Executando…' : 'Executar';
+  const jaResolvido = progresso.desafiosResolvidos.includes(desafio.slug);
 
   return (
     <section className="flex flex-col gap-4">
+      <p className="text-sm text-zinc-600 dark:text-zinc-400">
+        XP: <span className="font-medium text-zinc-950 dark:text-zinc-50">{progresso.xp}</span>
+        {xpGanho > 0 ? <span className="ml-2 text-green-700 dark:text-green-400">+{xpGanho} XP</span> : null}
+        {jaResolvido && xpGanho === 0 ? <span className="ml-2">Desafio já resolvido</span> : null}
+      </p>
       <label htmlFor="codigo" className="font-medium text-zinc-950 dark:text-zinc-50">
         Seu código
       </label>
