@@ -7,7 +7,10 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
-    "test": "vitest run"
+    "test": "vitest run",
+    "build:worker": "esbuild lib/python/avaliador.worker.ts --bundle --format=esm --platform=browser --outfile=public/pyodide-worker.js",
+    "predev": "npm run build:worker",
+    "prebuild": "npm run build:worker"
   },
   "dependencies": {
     "next": "16.4.3",
@@ -19,6 +22,7 @@
     "@types/node": "^20",
     "@types/react": "^19",
     "@types/react-dom": "^19",
+    "esbuild": "^0.28.2",
     "eslint": "^9",
     "eslint-config-next": "16.4.3",
     "tailwindcss": "^4",

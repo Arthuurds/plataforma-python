@@ -1,6 +1,13 @@
+export type Teste = {
+  nome: string;
+  codigo: string;
+};
+
 export type Desafio = {
   slug: string;
   titulo: string;
+  enunciado: string;
+  testes: Teste[];
 };
 
 export type Trilha = {
@@ -29,10 +36,42 @@ const trilhas: Trilha[] = [
 ];
 
 const desafios: Desafio[] = [
-  { slug: 'soma-de-dois-numeros', titulo: 'Soma de dois números' },
-  { slug: 'filtrar-lista-paridade', titulo: 'Filtrar lista por paridade' },
-  { slug: 'contar-palavras', titulo: 'Contar palavras' },
-  { slug: 'dicionario-de-frequencia', titulo: 'Dicionário de frequência' },
+  {
+    slug: 'soma-de-dois-numeros',
+    titulo: 'Soma de dois números',
+    enunciado: 'Escreva a função `soma(a, b)` que retorna a soma de dois números.',
+    testes: [
+      { nome: 'soma simples', codigo: 'assert soma(2, 3) == 5' },
+      { nome: 'soma com negativos', codigo: 'assert soma(-1, 1) == 0' },
+    ],
+  },
+  {
+    slug: 'filtrar-lista-paridade',
+    titulo: 'Filtrar lista por paridade',
+    enunciado: 'Escreva a função `filtrar_pares(lista)` que retorna apenas os números pares, na mesma ordem.',
+    testes: [
+      { nome: 'mantém os pares', codigo: 'assert filtrar_pares([1, 2, 3, 4]) == [2, 4]' },
+      { nome: 'lista vazia', codigo: 'assert filtrar_pares([]) == []' },
+    ],
+  },
+  {
+    slug: 'contar-palavras',
+    titulo: 'Contar palavras',
+    enunciado: 'Escreva a função `contar_palavras(texto)` que retorna quantas palavras há no texto, separadas por espaços.',
+    testes: [
+      { nome: 'três palavras', codigo: "assert contar_palavras('um dois três') == 3" },
+      { nome: 'texto vazio', codigo: "assert contar_palavras('') == 0" },
+    ],
+  },
+  {
+    slug: 'dicionario-de-frequencia',
+    titulo: 'Dicionário de frequência',
+    enunciado: 'Escreva a função `frequencia(palavras)` que retorna um dicionário com quantas vezes cada palavra aparece.',
+    testes: [
+      { nome: 'conta repetições', codigo: "assert frequencia(['a', 'b', 'a']) == {'a': 2, 'b': 1}" },
+      { nome: 'lista vazia', codigo: 'assert frequencia([]) == {}' },
+    ],
+  },
 ];
 
 const vinculos: VinculoTrilhaDesafio[] = [
@@ -49,6 +88,14 @@ export function listarTrilhas(): Trilha[] {
 
 export function getTrilha(slug: string): Trilha | undefined {
   return trilhas.find((trilha) => trilha.slug === slug);
+}
+
+export function getDesafio(slug: string): Desafio | undefined {
+  return desafios.find((desafio) => desafio.slug === slug);
+}
+
+export function listarDesafios(): Desafio[] {
+  return desafios;
 }
 
 export function listarDesafiosDaTrilha(trilhaSlug: string): Desafio[] {

@@ -1,5 +1,19 @@
 import { describe, expect, it } from 'vitest';
-import { getTrilha, listarDesafiosDaTrilha, listarTrilhas } from '../lib/catalog';
+import { getDesafio, getTrilha, listarDesafios, listarDesafiosDaTrilha, listarTrilhas } from '../lib/catalog';
+
+describe('catálogo de desafios', () => {
+  it('cada desafio tem enunciado e ao menos um teste', () => {
+    for (const desafio of listarDesafios()) {
+      expect(desafio.enunciado).not.toBe('');
+      expect(desafio.testes.length).toBeGreaterThan(0);
+    }
+  });
+
+  it('encontra um desafio pelo slug e retorna undefined para slug desconhecido', () => {
+    expect(getDesafio('soma-de-dois-numeros')?.titulo).toBe('Soma de dois números');
+    expect(getDesafio('desafio-que-nao-existe')).toBeUndefined();
+  });
+});
 
 describe('catálogo de trilhas', () => {
   it('lista as trilhas disponíveis', () => {

@@ -1,3 +1,4 @@
+import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { getTrilha, listarDesafiosDaTrilha, listarTrilhas } from '@/lib/catalog';
 
@@ -24,7 +25,9 @@ export default async function TrilhaPage({ params }: { params: Promise<{ slug: s
       <ol className="flex flex-col gap-3 list-decimal pl-6">
         {desafios.map((desafio) => (
           <li key={desafio.slug} className="text-zinc-950 dark:text-zinc-50">
-            {desafio.titulo}
+            <Link href={`/desafios/${desafio.slug}`} className="hover:underline">
+              {desafio.titulo}
+            </Link>
           </li>
         ))}
       </ol>
