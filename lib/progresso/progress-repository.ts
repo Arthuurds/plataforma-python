@@ -1,6 +1,8 @@
 export type Revisao = {
   desafioSlug: string;
   proximaData: string;
+  intervaloDias: number;
+  classificacoes: number;
 };
 
 export type Progresso = {
@@ -38,7 +40,12 @@ export function criarRepositorioLocalStorage(
         return {
           xp: progresso.xp ?? 0,
           desafiosResolvidos: progresso.desafiosResolvidos ?? [],
-          revisoes: progresso.revisoes ?? [],
+          revisoes: (progresso.revisoes ?? []).map((revisao) => ({
+            desafioSlug: revisao.desafioSlug,
+            proximaData: revisao.proximaData,
+            intervaloDias: revisao.intervaloDias ?? 1,
+            classificacoes: revisao.classificacoes ?? 0,
+          })),
         };
       } catch {
         return PROGRESSO_INICIAL;

@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { PROGRESSO_INICIAL, type Progresso, type ProgressRepository } from '../lib/progresso/progress-repository';
-import { criarProgressService, XP_POR_DESAFIO } from '../lib/progresso/progress-service';
+import { criarProgressService, XP_POR_DESAFIO, XP_POR_REVISAO } from '../lib/progresso/progress-service';
 
 const HOJE = '2026-03-10';
 
@@ -59,7 +59,7 @@ describe('ProgressService', () => {
       carregar: () => ({
         xp: XP_POR_DESAFIO,
         desafiosResolvidos: ['soma-de-dois-numeros'],
-        revisoes: [{ desafioSlug: 'soma-de-dois-numeros', proximaData: '2026-03-11' }],
+        revisoes: [{ desafioSlug: 'soma-de-dois-numeros', proximaData: '2026-03-11', intervaloDias: 1, classificacoes: 0 }],
       }),
       salvar: () => {
         escritas += 1;
@@ -87,7 +87,7 @@ describe('ProgressService: fila de revisões', () => {
     const resultado = service.registrarResolucao('soma-de-dois-numeros', HOJE);
 
     expect(resultado.progresso.revisoes).toEqual([
-      { desafioSlug: 'soma-de-dois-numeros', proximaData: '2026-03-11' },
+      { desafioSlug: 'soma-de-dois-numeros', proximaData: '2026-03-11', intervaloDias: 1, classificacoes: 0 },
     ]);
   });
 
@@ -106,9 +106,9 @@ describe('ProgressService: fila de revisões', () => {
         xp: 0,
         desafiosResolvidos: [],
         revisoes: [
-          { desafioSlug: 'vencida-ontem', proximaData: '2026-03-09' },
-          { desafioSlug: 'vence-hoje', proximaData: '2026-03-10' },
-          { desafioSlug: 'vence-amanha', proximaData: '2026-03-11' },
+          { desafioSlug: 'vencida-ontem', proximaData: '2026-03-09', intervaloDias: 1, classificacoes: 0 },
+          { desafioSlug: 'vence-hoje', proximaData: '2026-03-10', intervaloDias: 1, classificacoes: 0 },
+          { desafioSlug: 'vence-amanha', proximaData: '2026-03-11', intervaloDias: 1, classificacoes: 0 },
         ],
       }),
     );
@@ -122,5 +122,54 @@ describe('ProgressService: fila de revisões', () => {
     const service = criarProgressService(repositorioEmMemoria());
 
     expect(service.revisoesVencidas(HOJE)).toEqual([]);
+  });
+});
+
+describe('ProgressService: classificar revisão', () => {
+  function repositorioComRevisao(proximaData: string) {
+    return repositorioEmMemoria({
+      xp: 10,
+      desafiosResolvidos: ['soma-de-dois-numeros'],
+      revisoes: [{ desafioSlug: 'soma-de-dois-numeros', proximaData, intervaloDias: 1, classificacoes: 0 }],
+    });
+  }
+
+  it('concede XP em qualquer classificação, inclusive Errei', () => {
+    const service = criarProgressService(repositorioComRevisao(HOJE));
+
+    const resultado = service.classificarRevisao('soma-de-dois-numeros', 'errei', HOJE);
+
+    expect(resultado.xpGanho).toBe(XP_POR_REVISAO);
+    expect(resultado.progresso.xp).toBe(10 + XP_POR_REVISAO);
+  });
+
+  it('recalcula a próxima data da revisão conforme a classificação', () => {
+    const service = criarProgressService(repositorioComRevisao(HOJE));
+
+    const resultado = service.classificarRevisao('soma-de-dois-numeros', 'facil', HOJE);
+
+    expect(resultado.progresso.revisoes[0]).toEqual({
+      desafioSlug: 'soma-de-dois-numeros',
+      proximaData: '2026-03-18',
+      intervaloDias: 8,
+      classificacoes: 1,
+    });
+  });
+
+  it('não concede XP nem altera a revisão quando ela ainda não venceu', () => {
+    const service = criarProgressService(repositorioComRevisao('2026-03-11'));
+
+    const resultado = service.classificarRevisao('soma-de-dois-numeros', 'bom', HOJE);
+
+    expect(resultado.xpGanho).toBe(0);
+    expect(resultado.progresso.revisoes[0].proximaData).toBe('2026-03-11');
+  });
+
+  it('não faz nada para um desafio sem revisão na fila', () => {
+    const service = criarProgressService(repositorioEmMemoria());
+
+    const resultado = service.classificarRevisao('desafio-inexistente', 'bom', HOJE);
+
+    expect(resultado.xpGanho).toBe(0);
   });
 });

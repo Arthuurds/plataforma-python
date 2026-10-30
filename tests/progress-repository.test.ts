@@ -37,7 +37,7 @@ describe('criarRepositorioLocalStorage', () => {
     const progresso: Progresso = {
       xp: 10,
       desafiosResolvidos: ['soma-de-dois-numeros'],
-      revisoes: [{ desafioSlug: 'soma-de-dois-numeros', proximaData: '2026-03-11' }],
+      revisoes: [{ desafioSlug: 'soma-de-dois-numeros', proximaData: '2026-03-11', intervaloDias: 1, classificacoes: 0 }],
     };
 
     criarRepositorioLocalStorage(storage).salvar(progresso);
