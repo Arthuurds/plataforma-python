@@ -1,4 +1,5 @@
 import Link from 'next/link';
+import { Suspense } from 'react';
 import { notFound } from 'next/navigation';
 import { getTrilha, listarDesafiosDaTrilha, listarTrilhas } from '@/lib/catalog';
 
@@ -6,7 +7,17 @@ export function generateStaticParams() {
   return listarTrilhas().map((trilha) => ({ slug: trilha.slug }));
 }
 
-export default async function TrilhaPage({ params }: { params: Promise<{ slug: string }> }) {
+export default function TrilhaPage({ params }: { params: Promise<{ slug: string }> }) {
+  return (
+    <main className="mx-auto flex w-full max-w-3xl flex-col gap-6 px-4 py-16">
+      <Suspense fallback={<p className="text-zinc-600 dark:text-zinc-400">Carregando trilha…</p>}>
+        <ConteudoDaTrilha params={params} />
+      </Suspense>
+    </main>
+  );
+}
+
+async function ConteudoDaTrilha({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;
   const trilha = getTrilha(slug);
 
@@ -17,7 +28,7 @@ export default async function TrilhaPage({ params }: { params: Promise<{ slug: s
   const desafios = listarDesafiosDaTrilha(slug);
 
   return (
-    <main className="mx-auto flex w-full max-w-3xl flex-col gap-6 px-4 py-16">
+    <>
       <header className="flex flex-col gap-2">
         <h1 className="text-3xl font-semibold tracking-tight text-zinc-950 dark:text-zinc-50">{trilha.titulo}</h1>
         <p className="text-zinc-600 dark:text-zinc-400">{trilha.descricao}</p>
@@ -31,6 +42,6 @@ export default async function TrilhaPage({ params }: { params: Promise<{ slug: s
           </li>
         ))}
       </ol>
-    </main>
+    </>
   );
 }
