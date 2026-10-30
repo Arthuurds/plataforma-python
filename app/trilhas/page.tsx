@@ -8,9 +8,14 @@ export default function TrilhasPage() {
     <main className="mx-auto flex w-full max-w-3xl flex-col gap-6 px-4 py-16">
       <header className="flex items-baseline justify-between">
         <h1 className="text-3xl font-semibold tracking-tight text-zinc-950 dark:text-zinc-50">Trilhas</h1>
-        <Link href="/revisoes" className="text-sm font-medium hover:underline">
-          Revisões de hoje
-        </Link>
+        <nav className="flex gap-4 text-sm font-medium">
+          <Link href="/revisoes" className="hover:underline">
+            Revisões de hoje
+          </Link>
+          <Link href="/conquistas" className="hover:underline">
+            Conquistas
+          </Link>
+        </nav>
       </header>
       <ul className="flex flex-col gap-4">
         {trilhas.map((trilha) => (

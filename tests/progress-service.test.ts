@@ -60,6 +60,8 @@ describe('ProgressService', () => {
         xp: XP_POR_DESAFIO,
         desafiosResolvidos: ['soma-de-dois-numeros'],
         revisoes: [{ desafioSlug: 'soma-de-dois-numeros', proximaData: '2026-03-11', intervaloDias: 1, classificacoes: 0 }],
+        diasDeEstudo: [],
+        conquistas: [],
       }),
       salvar: () => {
         escritas += 1;
@@ -73,7 +75,7 @@ describe('ProgressService', () => {
   });
 
   it('obterProgresso devolve o progresso gravado, sem alterá-lo', () => {
-    const progresso: Progresso = { xp: 30, desafiosResolvidos: ['a', 'b', 'c'], revisoes: [] };
+    const progresso: Progresso = { xp: 30, desafiosResolvidos: ['a', 'b', 'c'], revisoes: [], diasDeEstudo: [], conquistas: [] };
     const service = criarProgressService(repositorioEmMemoria(progresso));
 
     expect(service.obterProgresso()).toEqual(progresso);
@@ -110,6 +112,8 @@ describe('ProgressService: fila de revisões', () => {
           { desafioSlug: 'vence-hoje', proximaData: '2026-03-10', intervaloDias: 1, classificacoes: 0 },
           { desafioSlug: 'vence-amanha', proximaData: '2026-03-11', intervaloDias: 1, classificacoes: 0 },
         ],
+        diasDeEstudo: [],
+        conquistas: [],
       }),
     );
 
@@ -131,6 +135,8 @@ describe('ProgressService: classificar revisão', () => {
       xp: 10,
       desafiosResolvidos: ['soma-de-dois-numeros'],
       revisoes: [{ desafioSlug: 'soma-de-dois-numeros', proximaData, intervaloDias: 1, classificacoes: 0 }],
+      diasDeEstudo: [],
+      conquistas: [],
     });
   }
 

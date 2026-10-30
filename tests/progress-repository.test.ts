@@ -38,6 +38,8 @@ describe('criarRepositorioLocalStorage', () => {
       xp: 10,
       desafiosResolvidos: ['soma-de-dois-numeros'],
       revisoes: [{ desafioSlug: 'soma-de-dois-numeros', proximaData: '2026-03-11', intervaloDias: 1, classificacoes: 0 }],
+      diasDeEstudo: [],
+      conquistas: [],
     };
 
     criarRepositorioLocalStorage(storage).salvar(progresso);
@@ -54,6 +56,8 @@ describe('criarRepositorioLocalStorage', () => {
       xp: 10,
       desafiosResolvidos: ['soma-de-dois-numeros'],
       revisoes: [],
+      diasDeEstudo: [],
+      conquistas: [],
     });
   });
 
@@ -72,6 +76,6 @@ describe('criarRepositorioLocalStorage', () => {
   it('falha ao gravar não lança erro para quem chama', () => {
     const repositorio = criarRepositorioLocalStorage(storageQueFalha());
 
-    expect(() => repositorio.salvar({ xp: 10, desafiosResolvidos: [], revisoes: [] })).not.toThrow();
+    expect(() => repositorio.salvar({ xp: 10, desafiosResolvidos: [], revisoes: [], diasDeEstudo: [], conquistas: [] })).not.toThrow();
   });
 });

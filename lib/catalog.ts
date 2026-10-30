@@ -86,6 +86,13 @@ export function listarTrilhas(): Trilha[] {
   return trilhas;
 }
 
+export function listarTrilhasResumo(): { slug: string; desafioSlugs: string[] }[] {
+  return trilhas.map((trilha) => ({
+    slug: trilha.slug,
+    desafioSlugs: listarDesafiosDaTrilha(trilha.slug).map((desafio) => desafio.slug),
+  }));
+}
+
 export function getTrilha(slug: string): Trilha | undefined {
   return trilhas.find((trilha) => trilha.slug === slug);
 }

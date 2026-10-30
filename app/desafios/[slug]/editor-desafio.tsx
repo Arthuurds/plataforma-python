@@ -7,6 +7,7 @@ import { PROGRESSO_INICIAL, type Progresso } from '@/lib/progresso/progress-repo
 import { criarProgressServiceDoNavegador } from '@/lib/progresso/navegador';
 import { calcularNivel } from '@/lib/progresso/nivel';
 import { dataLocal } from '@/lib/progresso/datas';
+import { CONQUISTAS } from '@/lib/progresso/conquistas';
 import type { ProgressService } from '@/lib/progresso/progress-service';
 
 const TEMPO_LIMITE_MS = 10000;
@@ -19,6 +20,7 @@ export function EditorDesafio({ desafio }: { desafio: Desafio }) {
   const [erro, setErro] = useState<string | null>(null);
   const [progresso, setProgresso] = useState<Progresso>(PROGRESSO_INICIAL);
   const [xpGanho, setXpGanho] = useState(0);
+  const [novasConquistas, setNovasConquistas] = useState<string[]>([]);
   const workerRef = useRef<Worker | null>(null);
   const tempoRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const progressRef = useRef<ProgressService | null>(null);
@@ -33,6 +35,7 @@ export function EditorDesafio({ desafio }: { desafio: Desafio }) {
       if (registro) {
         setXpGanho(registro.xpGanho);
         setProgresso(registro.progresso);
+        setNovasConquistas(registro.novasConquistas.map((id) => CONQUISTAS.find((c) => c.id === id)?.titulo ?? id));
       }
     },
     [desafio.slug],
@@ -100,6 +103,7 @@ export function EditorDesafio({ desafio }: { desafio: Desafio }) {
     setResultado(null);
     setErro(null);
     setXpGanho(0);
+    setNovasConquistas([]);
 
     const mensagem: MensagemParaWorker = { codigo, testes: desafio.testes };
     workerRef.current.postMessage(mensagem);
@@ -131,6 +135,11 @@ export function EditorDesafio({ desafio }: { desafio: Desafio }) {
           <span className="ml-2">nível máximo</span>
         )}
       </p>
+      {novasConquistas.length > 0 ? (
+        <p className="rounded-lg bg-amber-50 p-3 text-amber-900 dark:bg-amber-950 dark:text-amber-200">
+          Conquista desbloqueada: {novasConquistas.join(', ')}
+        </p>
+      ) : null}
       <label htmlFor="codigo" className="font-medium text-zinc-950 dark:text-zinc-50">
         Seu código
       </label>
