@@ -5,6 +5,7 @@ import type { Desafio } from '@/lib/catalog';
 import type { MensagemDoWorker, MensagemParaWorker, ResultadoAvaliacao } from '@/lib/python/avaliacao';
 import { PROGRESSO_INICIAL, type Progresso } from '@/lib/progresso/progress-repository';
 import { criarProgressServiceDoNavegador } from '@/lib/progresso/navegador';
+import { calcularNivel } from '@/lib/progresso/nivel';
 import type { ProgressService } from '@/lib/progresso/progress-service';
 
 const TEMPO_LIMITE_MS = 10000;
@@ -112,13 +113,22 @@ export function EditorDesafio({ desafio }: { desafio: Desafio }) {
 
   const textoBotao = !pronto ? 'Carregando Python…' : executando ? 'Executando…' : 'Executar';
   const jaResolvido = progresso.desafiosResolvidos.includes(desafio.slug);
+  const situacao = calcularNivel(progresso.xp);
 
   return (
     <section className="flex flex-col gap-4">
       <p className="text-sm text-zinc-600 dark:text-zinc-400">
-        XP: <span className="font-medium text-zinc-950 dark:text-zinc-50">{progresso.xp}</span>
+        Nível <span className="font-medium text-zinc-950 dark:text-zinc-50">{situacao.nivel}</span>
+        {' · '}XP <span className="font-medium text-zinc-950 dark:text-zinc-50">{progresso.xp}</span>
         {xpGanho > 0 ? <span className="ml-2 text-green-700 dark:text-green-400">+{xpGanho} XP</span> : null}
         {jaResolvido && xpGanho === 0 ? <span className="ml-2">Desafio já resolvido</span> : null}
+        {situacao.proximoNivel !== null ? (
+          <span className="ml-2">
+            faltam {situacao.xpRestante} XP para o nível {situacao.proximoNivel}
+          </span>
+        ) : (
+          <span className="ml-2">nível máximo</span>
+        )}
       </p>
       <label htmlFor="codigo" className="font-medium text-zinc-950 dark:text-zinc-50">
         Seu código
