@@ -1,6 +1,12 @@
+export type Revisao = {
+  desafioSlug: string;
+  proximaData: string;
+};
+
 export type Progresso = {
   xp: number;
   desafiosResolvidos: string[];
+  revisoes: Revisao[];
 };
 
 export interface ProgressRepository {
@@ -15,7 +21,7 @@ type StorageMinimo = {
 
 const CHAVE_PADRAO = 'plataforma-python:progresso';
 
-export const PROGRESSO_INICIAL: Progresso = { xp: 0, desafiosResolvidos: [] };
+export const PROGRESSO_INICIAL: Progresso = { xp: 0, desafiosResolvidos: [], revisoes: [] };
 
 export function criarRepositorioLocalStorage(
   storage: StorageMinimo,
@@ -28,8 +34,12 @@ export function criarRepositorioLocalStorage(
         if (bruto === null) {
           return PROGRESSO_INICIAL;
         }
-        const progresso = JSON.parse(bruto) as Progresso;
-        return { xp: progresso.xp, desafiosResolvidos: progresso.desafiosResolvidos };
+        const progresso = JSON.parse(bruto) as Partial<Progresso>;
+        return {
+          xp: progresso.xp ?? 0,
+          desafiosResolvidos: progresso.desafiosResolvidos ?? [],
+          revisoes: progresso.revisoes ?? [],
+        };
       } catch {
         return PROGRESSO_INICIAL;
       }

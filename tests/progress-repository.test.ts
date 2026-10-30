@@ -34,11 +34,27 @@ describe('criarRepositorioLocalStorage', () => {
 
   it('o progresso gravado é lido de volta, como se a página tivesse sido recarregada', () => {
     const storage = storageEmMemoria();
-    const progresso: Progresso = { xp: 10, desafiosResolvidos: ['soma-de-dois-numeros'] };
+    const progresso: Progresso = {
+      xp: 10,
+      desafiosResolvidos: ['soma-de-dois-numeros'],
+      revisoes: [{ desafioSlug: 'soma-de-dois-numeros', proximaData: '2026-03-11' }],
+    };
 
     criarRepositorioLocalStorage(storage).salvar(progresso);
 
     expect(criarRepositorioLocalStorage(storage).carregar()).toEqual(progresso);
+  });
+
+  it('progresso gravado antes das revisões existirem é lido com fila vazia', () => {
+    const storage = storageEmMemoria({
+      'plataforma-python:progresso': JSON.stringify({ xp: 10, desafiosResolvidos: ['soma-de-dois-numeros'] }),
+    });
+
+    expect(criarRepositorioLocalStorage(storage).carregar()).toEqual({
+      xp: 10,
+      desafiosResolvidos: ['soma-de-dois-numeros'],
+      revisoes: [],
+    });
   });
 
   it('dados corrompidos no storage voltam para o progresso inicial', () => {
@@ -56,6 +72,6 @@ describe('criarRepositorioLocalStorage', () => {
   it('falha ao gravar não lança erro para quem chama', () => {
     const repositorio = criarRepositorioLocalStorage(storageQueFalha());
 
-    expect(() => repositorio.salvar({ xp: 10, desafiosResolvidos: [] })).not.toThrow();
+    expect(() => repositorio.salvar({ xp: 10, desafiosResolvidos: [], revisoes: [] })).not.toThrow();
   });
 });

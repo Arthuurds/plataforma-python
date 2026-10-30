@@ -1,4 +1,5 @@
-import type { Progresso, ProgressRepository } from './progress-repository';
+import { somarDias } from './datas';
+import type { Progresso, ProgressRepository, Revisao } from './progress-repository';
 
 export const XP_POR_DESAFIO = 10;
 
@@ -9,7 +10,8 @@ export type ResultadoResolucao = {
 
 export interface ProgressService {
   obterProgresso(): Progresso;
-  registrarResolucao(desafioSlug: string): ResultadoResolucao;
+  registrarResolucao(desafioSlug: string, hoje: string): ResultadoResolucao;
+  revisoesVencidas(hoje: string): Revisao[];
 }
 
 export function criarProgressService(repositorio: ProgressRepository): ProgressService {
@@ -17,7 +19,7 @@ export function criarProgressService(repositorio: ProgressRepository): ProgressS
     obterProgresso() {
       return repositorio.carregar();
     },
-    registrarResolucao(desafioSlug) {
+    registrarResolucao(desafioSlug, hoje) {
       const atual = repositorio.carregar();
 
       if (atual.desafiosResolvidos.includes(desafioSlug)) {
@@ -27,10 +29,14 @@ export function criarProgressService(repositorio: ProgressRepository): ProgressS
       const progresso: Progresso = {
         xp: atual.xp + XP_POR_DESAFIO,
         desafiosResolvidos: [...atual.desafiosResolvidos, desafioSlug],
+        revisoes: [...atual.revisoes, { desafioSlug, proximaData: somarDias(hoje, 1) }],
       };
       repositorio.salvar(progresso);
 
       return { xpGanho: XP_POR_DESAFIO, progresso };
+    },
+    revisoesVencidas(hoje) {
+      return repositorio.carregar().revisoes.filter((revisao) => revisao.proximaData <= hoje);
     },
   };
 }

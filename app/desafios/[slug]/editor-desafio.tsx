@@ -6,6 +6,7 @@ import type { MensagemDoWorker, MensagemParaWorker, ResultadoAvaliacao } from '@
 import { PROGRESSO_INICIAL, type Progresso } from '@/lib/progresso/progress-repository';
 import { criarProgressServiceDoNavegador } from '@/lib/progresso/navegador';
 import { calcularNivel } from '@/lib/progresso/nivel';
+import { dataLocal } from '@/lib/progresso/datas';
 import type { ProgressService } from '@/lib/progresso/progress-service';
 
 const TEMPO_LIMITE_MS = 10000;
@@ -28,7 +29,7 @@ export function EditorDesafio({ desafio }: { desafio: Desafio }) {
         return;
       }
 
-      const registro = progressRef.current?.registrarResolucao(desafio.slug);
+      const registro = progressRef.current?.registrarResolucao(desafio.slug, dataLocal(new Date()));
       if (registro) {
         setXpGanho(registro.xpGanho);
         setProgresso(registro.progresso);
